@@ -14,6 +14,7 @@
             <span class="text">{{item.dayOfWeek}}</span>
             <span class="text">第{{item.timeStart}}节</span>
             <span class="text">{{item.building}}{{item.room}}</span>
+            <span class="text">{{item.smartWeeks | formatSmartWeeks}}</span>
           </div>
         </div>
         <div class="radioContent">
@@ -36,6 +37,71 @@ export default {
       ResHTML: "",
       courseArr: []
     };
+  },
+  filters: {
+    formatSmartWeeks: function(value) {
+      // console.log(value);
+      const indexArr = [];
+      for (let i = 0; i < value.length; i++) {
+        if (value[i] === 1) {
+          indexArr.push(i + 1);
+        }
+      }
+      const singleChildArray = []; //存放不连续的数组
+      let childArray = []; //存放当前连续数组
+      const childArrayContent = []; //存放连续数组的数组
+      let serial = false; //标记变量，标记目前是否是连续的
+      for (let i = 0; i < indexArr.length; i++) {
+        if (indexArr[i + 1] - indexArr[i] === 1) {
+          serial = true;
+          childArray.push(indexArr[i]);
+          childArray.push(indexArr[i + 1]);
+        } else {
+          serial = false;
+        }
+        //serial是false，说明当前连续已被断开
+        if (!serial) {
+          // console.log(childArray);
+
+          // 数组去重
+          const formatChildSet = new Set(childArray);
+          const formatChildArray = [...formatChildSet];
+          // console.log(formatChildArray);
+          if (formatChildArray.length !== 0) {
+            childArrayContent.push(formatChildArray);
+          }
+
+          if (i === indexArr.length - 1) {
+            let lastIsExsit = false;
+            for (let j = 0; j < childArrayContent.length; j++) {
+              const childArrayItem = [...childArrayContent[j]];
+              // console.log(childArrayItem);
+              if (childArrayItem.indexOf(indexArr[i]) !== -1) {
+                lastIsExsit = true;
+              } else {
+                lastIsExsit = false;
+              }
+            }
+            // console.log(lastIsExsit);
+            if (!lastIsExsit) {
+              singleChildArray.push(indexArr[i]);
+            }
+          } else {
+            singleChildArray.push(indexArr[i]);
+          }
+
+          childArray = [];
+        }
+      }
+      console.log(childArrayContent, singleChildArray);
+      const singleChildStr = singleChildArray.join(",");
+      let childStr = '';
+      for (let q = 0; q < childArrayContent.length; q++) {
+        const lastIndex = childArrayContent[q].length - 1;
+        childStr = childArrayContent[q][0] + "-" + childArrayContent[q][lastIndex] + " ";
+      }
+      return singleChildStr + childStr + "周";
+    }
   },
   async mounted() {
     const getData = await axios.get("http://127.0.0.1:7001/login");
@@ -62,7 +128,7 @@ export default {
   flex: 1;
   padding: 20px;
   font-size: 20px;
-  font-family: "黑体"
+  font-family: "黑体";
 }
 .courseBox {
   margin-bottom: 10px;
@@ -99,6 +165,6 @@ export default {
 .errorInput {
   margin-left: 20px;
   width: 300px;
-  font-size: 17px
+  font-size: 17px;
 }
 </style>
