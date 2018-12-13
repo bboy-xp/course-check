@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Check from "../src/views/Check";
+import CheckDate from "../src/views/CheckDate";
 
 Vue.use(Router);
 
@@ -12,6 +13,10 @@ export default new Router({
       path: "/",
       name: "check",
       component: Check
-    },
+    },{
+      path: "/checkDate",
+      name: "checkDate",
+      component: CheckDate
+    }
   ]
 });
